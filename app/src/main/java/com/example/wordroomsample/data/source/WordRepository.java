@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData;
 import com.example.wordroomsample.data.Word;
 import com.example.wordroomsample.data.source.local.WordDao;
 import com.example.wordroomsample.data.source.local.WordRoomDatabase;
+import com.example.wordroomsample.util.AppExecutors;
 
 import java.util.List;
 
@@ -25,8 +26,15 @@ public class WordRepository {
         return mAllWords;
     }
 
-    public void insert(Word word) {
-        new insertAsyncTask(mWordDao).execute(word);
+    public void insert(final Word word) {
+        AppExecutors executors = new AppExecutors();
+        executors.databaseIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                mWordDao.insert(word);
+            }
+        });
+//        new insertAsyncTask(mWordDao).execute(word);
     }
 
     private static class insertAsyncTask extends AsyncTask<Word, Void, Void> {

@@ -10,6 +10,7 @@ import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.wordroomsample.data.Word;
+import com.example.wordroomsample.util.AppExecutors;
 
 @Database(entities = {Word.class}, version = 1)
 public abstract class WordRoomDatabase extends RoomDatabase {
@@ -36,7 +37,19 @@ public abstract class WordRoomDatabase extends RoomDatabase {
                 @Override
                 public void onOpen(@NonNull SupportSQLiteDatabase db) {
                     super.onOpen(db);
-                    new PopulateDbAsync(INSTANCE).execute();
+                    AppExecutors executors = new AppExecutors();
+                    executors.databaseIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            WordDao dao = INSTANCE.wordDao();
+                            dao.deleteAll();
+                            Word word = new Word("Hello");
+                            dao.insert(word);
+                            word = new Word("World!");
+                            dao.insert(word);
+                        }
+                    });
+//                    new PopulateDbAsync(INSTANCE).execute();
                 }
             };
 
